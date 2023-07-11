@@ -26,25 +26,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ErrorDetails> handleResourceNotFoundException(@NotNull ResourceNotFoundException exception,
                                                                         @NotNull WebRequest webRequest)
     {
-        ErrorDetails errorDetails = new ErrorDetails(
-                LocalDateTime.now(),
-                exception.getMessage(),
-                webRequest.getDescription(false),
-                "USER_NOT_FOUND!"
-        );
+        ErrorDetails errorDetails = errorDetails(exception, webRequest, "USER_NOT_FOUND!");
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(@NotNull EmailAlreadyExistsException exception,
+    public ResponseEntity<ErrorDetails> emailAlreadyExistsException(@NotNull EmailAlreadyExistsException exception,
                                                                         @NotNull WebRequest webRequest)
     {
-        ErrorDetails errorDetails = new ErrorDetails(
-                LocalDateTime.now(),
-                exception.getMessage(),
-                webRequest.getDescription(false),
-                "EMAIL_ALREADY_EXISTS!"
-        );
+        ErrorDetails errorDetails = errorDetails(exception, webRequest, "EMAIL_ALREADY_EXISTS!");
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
@@ -52,13 +42,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ErrorDetails> handleGlobalException(@NotNull Exception exception,
                                                               @NotNull WebRequest webRequest)
     {
-        ErrorDetails errorDetails = new ErrorDetails(
+        ErrorDetails errorDetails = errorDetails(exception, webRequest, "INTERNAL SERVER ERROR!");
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ErrorDetails errorDetails(Exception exception, WebRequest webRequest, String message)
+    {
+        return new ErrorDetails(
                 LocalDateTime.now(),
                 exception.getMessage(),
                 webRequest.getDescription(false),
-                "INTERNAL SERVER ERROR!"
+                message
         );
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
