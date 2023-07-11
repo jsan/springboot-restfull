@@ -1,13 +1,7 @@
 package com.estudo.springboot.controller;
 
 import com.estudo.springboot.dto.UserDto;
-import com.estudo.springboot.exception.ResourceNotFoundException;
 import com.estudo.springboot.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +17,7 @@ import java.util.List;
         description = "CRUD, Create user, Read user, Update user and Delete user"
 )
 @RestController
-@ControllerAdvice
+// @ControllerAdvice // Document it how it works
 // @AllArgsConstructor
 @RequestMapping("users")
 public class UserController
@@ -124,30 +118,6 @@ public class UserController
     {
         userService.deleteUser(id);
         return new ResponseEntity<>("Deleted ok", HttpStatus.OK);
-    }
-
-    @PatchMapping("{id}")
-    public ResponseEntity<UserDto> updatePatchUser(@PathVariable Long id,
-                                                   @RequestBody JsonPatch patch)
-    {
-        try {
-            UserDto user = userService.getUserById(id);
-            UserDto userPatched = applyPatchToCustomer(patch, user);
-            userService.updateUser(userPatched);
-            return ResponseEntity.ok(userPatched);
-        } catch (JsonPatchException | JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-
-    private ObjectMapper objectMapper;
-
-    private UserDto applyPatchToCustomer(JsonPatch patch, UserDto targetUser) throws JsonPatchException, JsonProcessingException
-    {
-        JsonNode patched = patch.apply(objectMapper.convertValue(targetUser, JsonNode.class));
-        return objectMapper.treeToValue(patched, UserDto.class);
     }
 
     // @ExceptionHandler(ResourceNotFoundException.class)
