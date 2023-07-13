@@ -1,6 +1,7 @@
 package com.estudo.springboot.controller;
 
 import com.estudo.springboot.dto.UserDto;
+import com.estudo.springboot.entity.User;
 import com.estudo.springboot.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,7 +18,7 @@ import java.util.List;
         description = "CRUD, Create user, Read user, Update user and Delete user"
 )
 @RestController
-// @ControllerAdvice // Document it how it works
+@ControllerAdvice // Document it how it works
 // @AllArgsConstructor
 @RequestMapping("users")
 public class UserController
@@ -38,9 +39,9 @@ public class UserController
             description = "HTTP status User created"
     )
     @PostMapping("create")
-    public ResponseEntity<UserDto> saveUser(@RequestBody @Valid UserDto userDto)
+    public ResponseEntity<User> saveUser(@RequestBody @Valid User user)
     {
-        UserDto serviceUser = userService.createUser(userDto);
+        User serviceUser = userService.createUser(user);
         return new ResponseEntity<>(serviceUser, HttpStatus.CREATED);
     }
 

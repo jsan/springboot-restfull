@@ -26,15 +26,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ErrorDetails> handleResourceNotFoundException(@NotNull ResourceNotFoundException exception,
                                                                         @NotNull WebRequest webRequest)
     {
-        ErrorDetails errorDetails = errorDetails(exception, webRequest, "USER_NOT_FOUND!");
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                exception.getMessage(),
+                webRequest.getDescription(false),
+                "USER_NOT_FOUND!"
+        );
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorDetails> emailAlreadyExistsException(@NotNull EmailAlreadyExistsException exception,
-                                                                        @NotNull WebRequest webRequest)
+    public ResponseEntity<ErrorDetails> handleEmailAlreadyExistsException(@NotNull EmailAlreadyExistsException exception,
+                                                                          @NotNull WebRequest webRequest)
     {
-        ErrorDetails errorDetails = errorDetails(exception, webRequest, "EMAIL_ALREADY_EXISTS!");
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                exception.getMessage(),
+                webRequest.getDescription(false),
+                "EMAIL_ALREADY_EXISTS!"
+        );
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
@@ -42,28 +52,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ErrorDetails> handleGlobalException(@NotNull Exception exception,
                                                               @NotNull WebRequest webRequest)
     {
-        ErrorDetails errorDetails = errorDetails(exception, webRequest, "INTERNAL SERVER ERROR!");
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    private ErrorDetails errorDetails(Exception exception, WebRequest webRequest, String message)
-    {
-        return new ErrorDetails(
+        ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
                 exception.getMessage(),
                 webRequest.getDescription(false),
-                message
+                "INTERNAL SERVER ERROR!"
         );
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NotNull MethodArgumentNotValidException ex,
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NotNull MethodArgumentNotValidException invalidListExeption,
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   @NotNull WebRequest webRequest)
     {
+        List<ObjectError> errorList = invalidListExeption.getBindingResult().getAllErrors();
         Map<String, String> errors = new HashMap<>();
-        List<ObjectError> errorList = ex.getBindingResult().getAllErrors();
 
         errorList.forEach(error -> {
                     errors.put(((FieldError) error).getField(), error.getDefaultMessage());
@@ -72,8 +77,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
 
         ErrorDetails errorDetails = new ErrorDetails(
                 LocalDateTime.now(),
-                errors.entrySet()
-                        .stream()
+                errors.entrySet().stream()
                         .map(error -> error.getKey() + ":" + error.getValue())
                         .collect(Collectors.joining(", ")),
                 webRequest.getDescription(false),
@@ -81,5 +85,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler
 
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
-
 }

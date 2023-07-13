@@ -22,19 +22,18 @@ public class UserServiceImpl implements UserService
     private ModelMapper modelMapper;
 
     @Override
-    public UserDto createUser(UserDto userDto)
+    public User createUser(User userDto)
     {
-        userRepository.findByEmail(userDto.getEmailAddress())
+        userRepository.findByEmail(userDto.getEmail())
                 .ifPresent(s -> {
-                    throw new EmailAlreadyExistsException("Email", userDto.getEmailAddress());
+                    throw new EmailAlreadyExistsException("Email", userDto.getEmail());
                 });
 
         // Manually mapping: User userFromRequest = UserMapper.mapToUserJpa(userDto);
         // ModelMapper ..:User userFromRequest = modelMapper.map(userDto, User.class);
         // Used: MapStruct @Mapper on the AutoUserMapper
-        User userFromRequest = AutoUserMapper.MAPPER.autoMapToUser(userDto);
-        User userJpa = userRepository.save(userFromRequest);
-        return AutoUserMapper.MAPPER.autoMapToUserDto(userJpa);
+        User userJpa = userRepository.save(userDto);
+        return userJpa;
     }
 
     @Override
@@ -56,7 +55,6 @@ public class UserServiceImpl implements UserService
     {
         User userJpa = userRepository.findById(userId).
                 orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
-        // return UserMapper.mapToUserDto(userJpa.orElse(null));
         return AutoUserMapper.MAPPER.autoMapToUserDto(userJpa);
     }
 

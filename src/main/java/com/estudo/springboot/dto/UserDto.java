@@ -29,7 +29,7 @@ public class UserDto
     private String lastName;
 
     @Schema(description = "Email information")
-    @NotEmpty (message = "Email cannot be invalid:)")
     @Email
+    @NotEmpty (message = "Email cannot be invalid :)")
     private String emailAddress;
 }
